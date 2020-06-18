@@ -24,10 +24,35 @@ impl Display {
         self.screen[y * WIDTH + x]
     }
 
-    #[allow(unused_variables)]
+    fn destructure_byte_to_bool(byte: u8) -> [bool; 8] {
+        let mut bool_array: [bool; 8] = [false; 8];
+
+        //
+        for i in 0..8 {
+            bool_array[7 - i] = ((byte >> i) & 1) == 1;
+        }
+        return bool_array;
+    }
+
     pub fn draw(&mut self, x: usize, y: usize, sprite: &[u8]) -> bool {
-        // Work in progress
-        true
+        let mut collision_happened = false;
+        for (row_idx, &row) in sprite.iter().enumerate() {
+            println!("YESSSS: {:#x}, {:#010b}", row, row);
+            let bool_row = Self::destructure_byte_to_bool(row);
+
+            for (col_idx, &state) in bool_row.iter().enumerate() {
+                let pixel_pos = (y + row_idx) * WIDTH + x + col_idx;
+
+                println!(
+                    "Pixel {} position: {}. Screen value: {}. State value: {}",
+                    col_idx, pixel_pos, self.screen[pixel_pos], state
+                );
+                collision_happened = self.screen[pixel_pos] == true && state == true;
+                self.screen[pixel_pos] ^= state;
+            }
+        }
+
+        collision_happened
     }
 }
 
