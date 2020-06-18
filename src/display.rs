@@ -1,5 +1,10 @@
 use crate::{HEIGHT, WIDTH};
 
+pub enum Position {
+    Coordinates(usize, usize),
+    Index(usize),
+}
+
 pub struct Display {
     pub screen: [bool; 2048],
 }
@@ -15,39 +20,54 @@ impl Display {
         self.screen = [false; WIDTH * HEIGHT];
     }
 
-    pub fn set_pixel(&mut self, x: usize, y: usize, state: bool) {
-        self.screen[y * WIDTH + x] = state;
+    pub fn set_pixel(&mut self, position: Position, new_state: bool) {
+        let unified_position;
+        match position {
+            Position::Coordinates(x, y) => unified_position = y * WIDTH + x,
+            Position::Index(x) => unified_position = x,
+        }
+        // println!(
+        //     "Position: {}. Screen val: {}. new_state: {}",
+        //     unified_position, self.screen[unified_position], new_state
+        // );
+        self.screen[unified_position] ^= new_state;
+        // println!("After change: {}", self.screen[unified_position]);
     }
 
-    pub fn get_pixel(&self, x: usize, y: usize) -> bool {
-        self.screen[y * WIDTH + x]
+    pub fn get_pixel(&self, position: Position) -> bool {
+        match position {
+            Position::Coordinates(x, y) => self.screen[y * WIDTH + x],
+            Position::Index(x) => self.screen[x],
+        }
     }
 
     fn destructure_byte_to_bool(byte: u8) -> [bool; 8] {
         let mut bool_array: [bool; 8] = [false; 8];
 
-        //
+        // convert each bit of the byte to a bool and put it in the bool_array
         for i in 0..8 {
             bool_array[7 - i] = ((byte >> i) & 1) == 1;
         }
-        return bool_array;
+
+        bool_array
     }
 
     pub fn draw(&mut self, x: usize, y: usize, sprite: &[u8]) -> bool {
         let mut collision_happened = false;
+
+        // we iterate on each row of the sprite
+        // since the sprite is an slice of byte, each row is only a byte
         for (row_idx, &row) in sprite.iter().enumerate() {
             println!("YESSSS: {:#x}, {:#010b}", row, row);
             let bool_row = Self::destructure_byte_to_bool(row);
 
             for (col_idx, &state) in bool_row.iter().enumerate() {
                 let pixel_pos = (y + row_idx) * WIDTH + x + col_idx;
+                let current_pixel = self.get_pixel(Position::Index(pixel_pos));
 
-                println!(
-                    "Pixel {} position: {}. Screen value: {}. State value: {}",
-                    col_idx, pixel_pos, self.screen[pixel_pos], state
-                );
-                collision_happened = self.screen[pixel_pos] == true && state == true;
-                self.screen[pixel_pos] ^= state;
+                collision_happened = collision_happened || current_pixel == true && state == true;
+
+                self.set_pixel(Position::Index(pixel_pos), state);
             }
         }
 
