@@ -15,7 +15,6 @@ fn main() -> Result<(), String> {
     let cpu = Cpu::new();
     let mut display = Display::new();
     display.clear();
-    println!("{}", cpu);
 
     let sdl_context = sdl2::init().unwrap();
 

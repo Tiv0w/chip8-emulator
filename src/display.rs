@@ -26,12 +26,8 @@ impl Display {
             Position::Coordinates(x, y) => unified_position = y * WIDTH + x,
             Position::Index(x) => unified_position = x,
         }
-        // println!(
-        //     "Position: {}. Screen val: {}. new_state: {}",
-        //     unified_position, self.screen[unified_position], new_state
-        // );
+
         self.screen[unified_position] ^= new_state;
-        // println!("After change: {}", self.screen[unified_position]);
     }
 
     pub fn get_pixel(&self, position: Position) -> bool {
@@ -44,7 +40,7 @@ impl Display {
     fn destructure_byte_to_bool(byte: u8) -> [bool; 8] {
         let mut bool_array: [bool; 8] = [false; 8];
 
-        // convert each bit of the byte to a bool and put it in the bool_array
+        // Convert each bit of the byte to a bool and put it in the bool_array
         for i in 0..8 {
             bool_array[7 - i] = ((byte >> i) & 1) == 1;
         }
@@ -55,12 +51,12 @@ impl Display {
     pub fn draw(&mut self, x: usize, y: usize, sprite: &[u8]) -> bool {
         let mut collision_happened = false;
 
-        // we iterate on each row of the sprite
+        // We iterate on each row of the sprite
         // since the sprite is an slice of byte, each row is only a byte
         for (row_idx, &row) in sprite.iter().enumerate() {
-            println!("YESSSS: {:#x}, {:#010b}", row, row);
             let bool_row = Self::destructure_byte_to_bool(row);
 
+            // We iterate on each bit of the byte
             for (col_idx, &state) in bool_row.iter().enumerate() {
                 let pixel_pos = (y + row_idx) * WIDTH + x + col_idx;
                 let current_pixel = self.get_pixel(Position::Index(pixel_pos));
