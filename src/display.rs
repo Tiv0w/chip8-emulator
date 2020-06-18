@@ -1,5 +1,4 @@
-const WIDTH: usize = 64;
-const HEIGHT: usize = 32;
+use crate::{HEIGHT, WIDTH};
 
 pub struct Display {
     pub screen: [bool; 2048],

@@ -10,6 +10,9 @@ use sdl2::keyboard::Keycode;
 // use sdl2::pixels::Color;
 use std::time::Duration;
 
+const WIDTH: usize = 64;
+const HEIGHT: usize = 32;
+
 fn main() -> Result<(), String> {
     let cpu = Cpu::new();
     let mut display = Display::new();
