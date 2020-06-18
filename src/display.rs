@@ -2,7 +2,7 @@ const WIDTH: usize = 64;
 const HEIGHT: usize = 32;
 
 pub struct Display {
-    screen: [bool; 2048],
+    pub screen: [bool; 2048],
 }
 
 impl Display {
@@ -24,6 +24,7 @@ impl Display {
         self.screen[y * WIDTH + x]
     }
 
+    #[allow(unused_variables)]
     pub fn draw(&mut self, x: usize, y: usize, sprite: &[u8]) -> bool {
         // Work in progress
         true
