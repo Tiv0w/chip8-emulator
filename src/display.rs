@@ -65,7 +65,7 @@ impl Display {
                 let pixel_pos = (y + row_idx) * WIDTH + x + col_idx;
                 let current_pixel = self.get_pixel(Position::Index(pixel_pos));
 
-                collision_happened = collision_happened || current_pixel == true && state == true;
+                collision_happened = collision_happened || current_pixel && state;
 
                 self.set_pixel(Position::Index(pixel_pos), state);
             }

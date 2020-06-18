@@ -4,10 +4,8 @@ mod graphics;
 use crate::cpu::Cpu;
 use crate::display::Display;
 use crate::graphics::Graphics;
-use sdl2;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-// use sdl2::pixels::Color;
 use std::time::Duration;
 
 const WIDTH: usize = 64;
@@ -16,6 +14,7 @@ const HEIGHT: usize = 32;
 fn main() -> Result<(), String> {
     let cpu = Cpu::new();
     let mut display = Display::new();
+    display.clear();
     println!("{}", cpu);
 
     let sdl_context = sdl2::init().unwrap();
