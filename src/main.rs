@@ -19,7 +19,7 @@ fn main() -> Result<(), String> {
     let sdl_context = sdl2::init().unwrap();
 
     let mut graphics = Graphics::new(&sdl_context);
-    graphics.draw_display(&display.screen);
+    graphics.draw_display(display.screen);
 
     let mut event_pump = sdl_context.event_pump()?;
 
@@ -40,8 +40,8 @@ fn main() -> Result<(), String> {
                     ..
                 } => {
                     let array = [0x20, 0x60, 0x20, 0x20, 0x70];
-                    println!("Collision: {}", display.draw(3, 2, &array));
-                    graphics.draw_display(&display.screen);
+                    println!("Collision: {}", display.draw((3, 2), &array));
+                    graphics.draw_display(display.screen);
                 }
                 _ => {}
             }

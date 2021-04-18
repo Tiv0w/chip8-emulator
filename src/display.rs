@@ -1,40 +1,28 @@
 use crate::{HEIGHT, WIDTH};
 
-pub enum Position {
-    Coordinates(usize, usize),
-    Index(usize),
-}
+type Coordinates = (usize, usize);
 
 pub struct Display {
-    pub screen: [bool; 2048],
+    pub screen: [[bool; HEIGHT]; WIDTH],
 }
 
 impl Display {
     pub fn new() -> Display {
         Display {
-            screen: [false; WIDTH * HEIGHT],
+            screen: [[false; HEIGHT]; WIDTH],
         }
     }
 
     pub fn clear(&mut self) {
-        self.screen = [false; WIDTH * HEIGHT];
+        self.screen = [[false; HEIGHT]; WIDTH];
     }
 
-    pub fn set_pixel(&mut self, position: Position, new_state: bool) {
-        let unified_position;
-        match position {
-            Position::Coordinates(x, y) => unified_position = y * WIDTH + x,
-            Position::Index(x) => unified_position = x,
-        }
-
-        self.screen[unified_position] ^= new_state;
+    pub fn set_pixel(&mut self, (x, y): Coordinates, new_state: bool) {
+        self.screen[x][y] ^= new_state;
     }
 
-    pub fn get_pixel(&self, position: Position) -> bool {
-        match position {
-            Position::Coordinates(x, y) => self.screen[y * WIDTH + x],
-            Position::Index(x) => self.screen[x],
-        }
+    pub fn get_pixel(&self, (x, y): Coordinates) -> bool {
+        self.screen[x][y]
     }
 
     fn destructure_byte_to_bool(byte: u8) -> [bool; 8] {
@@ -48,7 +36,7 @@ impl Display {
         bool_array
     }
 
-    pub fn draw(&mut self, x: usize, y: usize, sprite: &[u8]) -> bool {
+    pub fn draw(&mut self, (x, y): Coordinates, sprite: &[u8]) -> bool {
         let mut collision_happened = false;
 
         // We iterate on each row of the sprite
@@ -58,12 +46,12 @@ impl Display {
 
             // We iterate on each bit of the byte
             for (col_idx, &state) in bool_row.iter().enumerate() {
-                let pixel_pos = (y + row_idx) * WIDTH + x + col_idx;
-                let current_pixel = self.get_pixel(Position::Index(pixel_pos));
+                let pixel_pos = ((x + col_idx), (y + row_idx));
+                let current_pixel = self.get_pixel(pixel_pos);
 
-                collision_happened = collision_happened || current_pixel && state;
+                collision_happened = collision_happened || (current_pixel && state);
 
-                self.set_pixel(Position::Index(pixel_pos), state);
+                self.set_pixel(pixel_pos, state);
             }
         }
 

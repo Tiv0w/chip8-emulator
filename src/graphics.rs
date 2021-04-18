@@ -33,15 +33,14 @@ impl Graphics {
     }
 
     // Draw the current display to the SDL
-    pub fn draw_display(&mut self, screen: &[bool]) {
+    pub fn draw_display(&mut self, screen: [[bool; HEIGHT]; WIDTH]) {
         self.canvas.set_draw_color(Color::BLACK);
         self.canvas.clear();
 
         self.canvas.set_draw_color(Color::WHITE);
-        for y in 0..HEIGHT {
-            let offset = WIDTH * y;
-            for x in 0..WIDTH {
-                if screen[offset + x] {
+        for x in 0..WIDTH {
+            for y in 0..HEIGHT {
+                if screen[x][y] {
                     self.canvas
                         .draw_point(Point::new(x as i32, y as i32))
                         .unwrap();
