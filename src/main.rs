@@ -12,7 +12,8 @@ const WIDTH: usize = 64;
 const HEIGHT: usize = 32;
 
 fn main() -> Result<(), String> {
-    let cpu = Cpu::new();
+    let mut cpu = Cpu::new();
+    println!("{:?}", cpu);
     let mut display = Display::new();
     display.clear();
 
@@ -40,8 +41,16 @@ fn main() -> Result<(), String> {
                     ..
                 } => {
                     let array = [0x20, 0x60, 0x20, 0x20, 0x70];
-                    println!("Collision: {}", display.draw((3, 2), &array));
+                    let collision = display.draw((3, 2), &array);
+                    cpu.set_vf(collision as u8);
                     graphics.draw_display(display.screen);
+                }
+                Event::KeyDown {
+                    keycode: Some(Keycode::E),
+                    ..
+                } => {
+                    cpu.execute_opcode(0x00E0);
+                    cpu.execute_opcode(0x00EE);
                 }
                 _ => {}
             }
