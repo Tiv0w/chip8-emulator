@@ -32,8 +32,8 @@ impl Graphics {
         Graphics { canvas }
     }
 
-    // Draw the current display to the SDL
-    pub fn draw_display(&mut self, screen: [[bool; HEIGHT]; WIDTH]) {
+    // Draw the current screen to the SDL
+    pub fn draw_screen(&mut self, screen: [[bool; HEIGHT]; WIDTH]) {
         self.canvas.set_draw_color(Color::BLACK);
         self.canvas.clear();
 

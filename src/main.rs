@@ -20,7 +20,7 @@ fn main() -> Result<(), String> {
     let sdl_context = sdl2::init().unwrap();
 
     let mut graphics = Graphics::new(&sdl_context);
-    graphics.draw_display(display.screen);
+    graphics.draw_screen(display.screen);
 
     let mut event_pump = sdl_context.event_pump()?;
 
@@ -43,7 +43,7 @@ fn main() -> Result<(), String> {
                     let array = [0x20, 0x60, 0x20, 0x20, 0x70];
                     let collision = display.draw((3, 2), &array);
                     cpu.set_vf(collision as u8);
-                    graphics.draw_display(display.screen);
+                    graphics.draw_screen(display.screen);
                 }
                 Event::KeyDown {
                     keycode: Some(Keycode::E),
