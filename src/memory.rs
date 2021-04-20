@@ -9,7 +9,7 @@ impl Memory {
             default_mem[index] = *byte;
         }
         default_mem[0x50] = 0xD3;
-        default_mem[0x51] = 0x25;
+        default_mem[0x51] = 0x24;
         Memory { mem: default_mem }
     }
 

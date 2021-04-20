@@ -209,12 +209,11 @@ impl Cpu {
 
     fn draw(&mut self, bus: &mut Bus, x: u8, y: u8, n: u8) {
         let mut sprite_vec: Vec<u8> = Vec::new();
-        for j in 0..n {
+        for j in 0..n + 1 {
             let address = self.i + j as u16;
             sprite_vec.push(bus.memory.read_byte(address as usize));
         }
 
-        // let array = [0x20, 0x60, 0x20, 0x20, 0x70];
         let collision = bus.display.draw((x as usize, y as usize), &sprite_vec);
         self.set_vf(collision as u8);
     }
