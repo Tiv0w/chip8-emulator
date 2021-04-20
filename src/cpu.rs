@@ -37,14 +37,24 @@ impl Cpu {
             [0x0, a, b, c] => {
                 println!("Perfect {} {} {}", a, b, c);
             }
+            [0xD, x, y, n] => {
+                println!("Draw {} {} {}", x, y, n);
+                self.draw(bus, x, y, n);
+            }
             [a, b, c, d] => {
                 println!("Not implemented for now {} {} {} {}", a, b, c, d);
             }
         }
     }
 
-    pub fn set_vf(&mut self, value: u8) {
+    fn set_vf(&mut self, value: u8) {
         self.v[15] = value;
+    }
+
+    fn draw(&mut self, bus: &mut Bus, x: u8, y: u8, n: u8) {
+        let array = [0x20, 0x60, 0x20, 0x20, 0x70];
+        let collision = bus.display.draw((x as usize, y as usize), &array);
+        self.set_vf(collision as u8);
     }
 }
 

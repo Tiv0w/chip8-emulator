@@ -24,11 +24,10 @@ fn main() -> Result<(), String> {
 
     'main: loop {
         match input.read_input() {
+            // TEMP: input not translated, still for testing
             Some(Keycode::Escape) | Some(Keycode::Q) => break 'main,
             Some(Keycode::D) => {
-                let array = [0x20, 0x60, 0x20, 0x20, 0x70];
-                let collision = vm.bus.display.draw((3, 2), &array);
-                vm.cpu.set_vf(collision as u8);
+                vm.cpu.execute_opcode(&mut vm.bus, 0xD32E);
                 println!("{:?}", vm.cpu);
             }
             Some(Keycode::E) => {
