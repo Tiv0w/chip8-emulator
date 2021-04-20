@@ -24,6 +24,14 @@ impl Cpu {
         }
     }
 
+    pub fn run(&mut self, bus: &mut Bus) {
+        let opcode_high: u16 = ((bus.memory.read_byte(self.pc as usize)) as u16) << 8;
+        let opcode_low: u16 = (bus.memory.read_byte((self.pc as usize) + 1)) as u16;
+        let opcode: u16 = opcode_high | opcode_low;
+
+        self.execute_opcode(bus, opcode);
+    }
+
     pub fn execute_opcode(&mut self, bus: &mut Bus, opcode: u16) {
         let hex_digits: [u8; 4] = utils::get_hex_digits(opcode);
         match hex_digits {

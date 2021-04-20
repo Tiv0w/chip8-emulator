@@ -15,11 +15,9 @@ impl VM {
         }
     }
 
-    pub fn run(&self) {
+    pub fn run(&mut self) {
         println!("{:?}", self.cpu);
-        'vm_running: loop {
-            break 'vm_running;
-        }
+        self.cpu.run(&mut self.bus);
     }
 
     pub fn get_screen(&self) -> [[bool; HEIGHT]; WIDTH] {

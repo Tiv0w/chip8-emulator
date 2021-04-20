@@ -37,9 +37,11 @@ fn main() -> Result<(), String> {
             _ => {}
         }
 
+        vm.run();
         graphics.draw_screen(vm.get_screen());
         // Chip8 runs at 60Hz
-        std::thread::sleep(Duration::new(0, 1_000_000_000 / 60));
+        // TEMP: for testing, runs at 3Hz
+        std::thread::sleep(Duration::new(0, 1_000_000_000 / 3));
     }
 
     Ok(())
