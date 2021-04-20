@@ -15,8 +15,8 @@ impl Cpu {
     pub fn new() -> Cpu {
         Cpu {
             delay: 0,
-            i: 0,
-            pc: 0,
+            i: 0x0A,
+            pc: 0x50,
             sound: 0,
             sp: 0,
             stack: [0; 16],
@@ -25,11 +25,16 @@ impl Cpu {
     }
 
     pub fn run(&mut self, bus: &mut Bus) {
-        let opcode_high: u16 = ((bus.memory.read_byte(self.pc as usize)) as u16) << 8;
-        let opcode_low: u16 = (bus.memory.read_byte((self.pc as usize) + 1)) as u16;
-        let opcode: u16 = opcode_high | opcode_low;
-
+        let opcode = self.get_opcode_at_address(bus, self.pc);
         self.execute_opcode(bus, opcode);
+        // self.next_instruction();
+    }
+
+    fn get_opcode_at_address(&self, bus: &Bus, address: u16) -> u16 {
+        let add: usize = address as usize;
+        let opcode_high: u16 = ((bus.memory.read_byte(add)) as u16) << 8;
+        let opcode_low: u16 = (bus.memory.read_byte(add + 1)) as u16;
+        opcode_high | opcode_low
     }
 
     pub fn execute_opcode(&mut self, bus: &mut Bus, opcode: u16) {
@@ -45,23 +50,168 @@ impl Cpu {
             [0x0, a, b, c] => {
                 println!("Perfect {} {} {}", a, b, c);
             }
+            [0x1, ..] => {
+                println!("Jump to {}", opcode & 0x0FFF);
+                self.pc = opcode & 0x0FFF;
+            }
+            [0x2, ..] => {
+                println!("Call subroutine at {}", opcode & 0x0FFF);
+                let subroutine_opcode = self.get_opcode_at_address(bus, opcode & 0x0FFF);
+                self.execute_opcode(bus, subroutine_opcode);
+            }
+            [0x3, x, ..] => {
+                println!("Skip next instruction if equal to {}", opcode & 0x00FF);
+                let vx = self.v[x as usize];
+                if vx == (opcode & 0x00FF) as u8 {
+                    self.skip_next_instruction();
+                }
+            }
+            [0x4, x, ..] => {
+                println!("Skip next instruction if not equal to {}", opcode & 0x00FF);
+                let vx = self.v[x as usize];
+                if vx != (opcode & 0x00FF) as u8 {
+                    self.skip_next_instruction();
+                }
+            }
+            [0x5, x, y, 0] => {
+                println!("Skip next instruction if V{} == V{}", x, y);
+                let vx = self.v[x as usize];
+                let vy = self.v[y as usize];
+                if vx == vy {
+                    self.skip_next_instruction();
+                }
+            }
+            [0x5, ..] => {
+                println!("Illegal instruction");
+            }
+            [0x6, x, ..] => {
+                println!("Assign V{} = {}", x, opcode & 0x00FF);
+                self.v[x as usize] = (opcode & 0x00FF) as u8;
+            }
+            [0x7, x, ..] => {
+                println!("Add {} to V{}", opcode & 0x00FF, x);
+                let vx: u16 = self.v[x as usize] as u16;
+                let add_result: u16 = (opcode & 0x00FF) + vx;
+                self.v[x as usize] = (add_result & 0x00FF) as u8;
+            }
+            [0x8, x, y, 0] => {
+                println!("Assign V{} to V{}", y, x);
+                self.v[x as usize] = self.v[y as usize];
+            }
+            [0x8, x, y, 1] => {
+                println!("Set V{} to (V{} OR V{})", x, x, y);
+                self.v[x as usize] = self.v[x as usize] | self.v[y as usize];
+            }
+            [0x8, x, y, 2] => {
+                println!("Set V{} to (V{} AND V{})", x, x, y);
+                self.v[x as usize] = self.v[x as usize] & self.v[y as usize];
+            }
+            [0x8, x, y, 3] => {
+                println!("Set V{} to (V{} XOR V{})", x, x, y);
+                self.v[x as usize] = self.v[x as usize] ^ self.v[y as usize];
+            }
+            [0x8, x, y, 4] => {
+                println!("Add V{} to V{}", y, x);
+                let vx: u16 = self.v[x as usize] as u16;
+                let vy: u16 = self.v[y as usize] as u16;
+                let add_result: u16 = vx + vy;
+                self.v[x as usize] = (add_result & 0x00FF) as u8;
+                self.v[0xF] = if (add_result >> 8) > 0 { 1 } else { 0 };
+            }
+            [0x8, x, y, 5] => {
+                println!("Subtract V{} to V{}", y, x);
+                let vx: i8 = self.v[x as usize] as i8;
+                let vy: i8 = self.v[y as usize] as i8;
+                let sub_result: i8 = vx - vy;
+                self.v[x as usize] = sub_result as u8;
+                self.v[0xF] = if sub_result < 0 { 0 } else { 1 };
+            }
+            [0x8, x, _, 6] => {
+                println!("Shifts V{} by 1, stores last bit in VF", x);
+                let vx = self.v[x as usize];
+                self.v[0xF] = vx & 0x1;
+                self.v[x as usize] = vx >> 1;
+            }
+            [0x8, x, y, 7] => {
+                println!("Stores in V{} V{} - V{}", x, y, x);
+                let vx: i8 = self.v[x as usize] as i8;
+                let vy: i8 = self.v[y as usize] as i8;
+                let sub_result: i8 = vy - vx;
+                self.v[x as usize] = sub_result as u8;
+                self.v[0xF] = if sub_result < 0 { 0 } else { 1 };
+            }
+            [0x8, x, _, 0xE] => {
+                println!("Shifts left V{} by 1, stores first bit in VF", x);
+                let vx = self.v[x as usize];
+                self.v[0xF] = vx & 0x80;
+                self.v[x as usize] = vx << 1;
+            }
+            [0x8, ..] => {
+                println!("Illegal instruction");
+            }
+            [0x9, x, y, 0] => {
+                println!("Skip next instruction if V{} != V{}", x, y);
+                let vx = self.v[x as usize];
+                let vy = self.v[y as usize];
+                if vx != vy {
+                    self.skip_next_instruction();
+                }
+            }
+            [0x9, ..] => {
+                println!("Illegal instruction");
+            }
+            [0xA, ..] => {
+                println!("Set I to address {}", opcode & 0x0FFF);
+                self.i = opcode & 0x0FFF;
+            }
+            [0xB, ..] => {
+                println!("Jump to address {} + V0", opcode & 0x0FFF);
+                self.pc = opcode & 0x0FFF + self.v[0] as u16;
+            }
+            [0xC, x, ..] => {
+                println!("Set V{} to Rand AND {}", x, opcode & 0x00FF);
+                let constant = (opcode & 0x00FF) as u8;
+                let rand = 0x2; // FIXME: use real random
+                self.v[x as usize] = rand & constant;
+            }
             [0xD, x, y, n] => {
                 println!("Draw {} {} {}", x, y, n);
                 self.draw(bus, x, y, n);
             }
+            [0xE, x, 9, n] => {
+                println!("Draw {} {}", x, n);
+                // self.draw(bus, x, y, n);
+            }
             [a, b, c, d] => {
-                println!("Not implemented for now {} {} {} {}", a, b, c, d);
+                println!(
+                    "Not implemented for now or illegal: {} {} {} {}",
+                    a, b, c, d
+                );
             }
         }
     }
 
     fn set_vf(&mut self, value: u8) {
-        self.v[15] = value;
+        self.v[0xF] = value;
+    }
+
+    fn skip_next_instruction(&mut self) {
+        self.pc += 2;
+    }
+
+    fn next_instruction(&mut self) {
+        self.pc += 2;
     }
 
     fn draw(&mut self, bus: &mut Bus, x: u8, y: u8, n: u8) {
-        let array = [0x20, 0x60, 0x20, 0x20, 0x70];
-        let collision = bus.display.draw((x as usize, y as usize), &array);
+        let mut sprite_vec: Vec<u8> = Vec::new();
+        for j in 0..n {
+            let address = self.i + j as u16;
+            sprite_vec.push(bus.memory.read_byte(address as usize));
+        }
+
+        // let array = [0x20, 0x60, 0x20, 0x20, 0x70];
+        let collision = bus.display.draw((x as usize, y as usize), &sprite_vec);
         self.set_vf(collision as u8);
     }
 }
@@ -74,8 +224,8 @@ impl std::fmt::Debug for Cpu {
             "Cpu {{\n\tdelay: {},\n\ti: {},\n\tsound: {},\n\tpc: {},\n\tsp: {},\n\tstack: {:?},\n\tv: {:?}\n}}",
             self.delay,
             self.i,
-            self.pc,
             self.sound,
+            self.pc,
             self.sp,
             self.stack,
             self.v
