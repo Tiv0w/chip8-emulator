@@ -4,6 +4,7 @@ mod display;
 mod graphics;
 mod input;
 mod memory;
+mod utils;
 mod vm;
 use crate::graphics::Graphics;
 use crate::input::Input;
@@ -28,7 +29,6 @@ fn main() -> Result<(), String> {
                 let array = [0x20, 0x60, 0x20, 0x20, 0x70];
                 let collision = vm.bus.display.draw((3, 2), &array);
                 vm.cpu.set_vf(collision as u8);
-                graphics.draw_screen(vm.get_screen());
                 println!("{:?}", vm.cpu);
             }
             Some(Keycode::E) => {
@@ -38,6 +38,7 @@ fn main() -> Result<(), String> {
             _ => {}
         }
 
+        graphics.draw_screen(vm.get_screen());
         // Chip8 runs at 60Hz
         std::thread::sleep(Duration::new(0, 1_000_000_000 / 60));
     }

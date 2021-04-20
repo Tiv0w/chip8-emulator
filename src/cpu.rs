@@ -1,4 +1,5 @@
 use crate::bus::Bus;
+use crate::utils;
 
 pub struct Cpu {
     delay: u8,
@@ -23,24 +24,8 @@ impl Cpu {
         }
     }
 
-    pub fn set_vf(&mut self, value: u8) {
-        self.v[15] = value;
-    }
-
-    fn get_hex_digits(opcode: u16) -> [u8; 4] {
-        let mut digits_array: [u8; 4] = [0; 4];
-
-        for i in 0..4 {
-            let hex: u16 = 0x10;
-            digits_array[i] = ((opcode / hex.pow(i as u32)) % hex) as u8;
-        }
-        digits_array.reverse();
-
-        digits_array
-    }
-
     pub fn execute_opcode(&mut self, bus: &mut Bus, opcode: u16) {
-        let hex_digits: [u8; 4] = Self::get_hex_digits(opcode);
+        let hex_digits: [u8; 4] = utils::get_hex_digits(opcode);
         match hex_digits {
             [0x0, 0x0, 0xE, 0x0] => {
                 println!("Clearscreen op");
@@ -56,6 +41,10 @@ impl Cpu {
                 println!("Not implemented for now {} {} {} {}", a, b, c, d);
             }
         }
+    }
+
+    pub fn set_vf(&mut self, value: u8) {
+        self.v[15] = value;
     }
 }
 
