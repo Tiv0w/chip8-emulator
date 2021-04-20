@@ -1,7 +1,8 @@
+use crate::bus::Bus;
+
 pub struct Cpu {
     delay: u8,
     i: u16,
-    memory: [u8; 4096],
     pc: u16,
     sound: u8,
     sp: u16,
@@ -14,7 +15,6 @@ impl Cpu {
         Cpu {
             delay: 0,
             i: 0,
-            memory: [0; 4096],
             pc: 0,
             sound: 0,
             sp: 0,
@@ -39,13 +39,22 @@ impl Cpu {
         digits_array
     }
 
-    pub fn execute_opcode(&mut self, opcode: u16) {
+    pub fn execute_opcode(&mut self, bus: &mut Bus, opcode: u16) {
         let hex_digits: [u8; 4] = Self::get_hex_digits(opcode);
         match hex_digits {
-            [0x0, 0x0, 0xE, 0x0] => println!("Clearscreen op"),
-            [0x0, 0x0, 0xE, 0xE] => println!("Return from chip8 subroutine"),
-            [0x0, a, b, c] => println!("Perfect {} {} {}", a, b, c),
-            [a, b, c, d] => println!("Not implemented for now {} {} {} {}", a, b, c, d),
+            [0x0, 0x0, 0xE, 0x0] => {
+                println!("Clearscreen op");
+                bus.display.clear();
+            }
+            [0x0, 0x0, 0xE, 0xE] => {
+                println!("Return from chip8 subroutine");
+            }
+            [0x0, a, b, c] => {
+                println!("Perfect {} {} {}", a, b, c);
+            }
+            [a, b, c, d] => {
+                println!("Not implemented for now {} {} {} {}", a, b, c, d);
+            }
         }
     }
 }
@@ -55,10 +64,9 @@ impl std::fmt::Debug for Cpu {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(
             f,
-            "Cpu {{\n\tdelay: {},\n\ti: {},\n\tmemory: {:?}...,\n\tsound: {},\n\tpc: {},\n\tsp: {},\n\tstack: {:?},\n\tv: {:?}\n}}",
+            "Cpu {{\n\tdelay: {},\n\ti: {},\n\tsound: {},\n\tpc: {},\n\tsp: {},\n\tstack: {:?},\n\tv: {:?}\n}}",
             self.delay,
             self.i,
-            &self.memory[..32],
             self.pc,
             self.sound,
             self.sp,

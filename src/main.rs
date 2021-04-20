@@ -1,10 +1,13 @@
+mod bus;
 mod cpu;
 mod display;
 mod graphics;
-use crate::cpu::Cpu;
-use crate::display::Display;
+mod input;
+mod memory;
+mod vm;
 use crate::graphics::Graphics;
-use sdl2::event::Event;
+use crate::input::Input;
+use crate::vm::VM;
 use sdl2::keyboard::Keycode;
 use std::time::Duration;
 
@@ -12,50 +15,30 @@ const WIDTH: usize = 64;
 const HEIGHT: usize = 32;
 
 fn main() -> Result<(), String> {
-    let mut cpu = Cpu::new();
-    println!("{:?}", cpu);
-    let mut display = Display::new();
-    display.clear();
-
     let sdl_context = sdl2::init().unwrap();
 
     let mut graphics = Graphics::new(&sdl_context);
-    graphics.draw_screen(display.screen);
+    let mut vm = VM::new();
+    let mut input = Input::new(&sdl_context);
 
-    let mut event_pump = sdl_context.event_pump()?;
-
-    'running: loop {
-        for event in event_pump.poll_iter() {
-            match event {
-                Event::Quit { .. }
-                | Event::KeyDown {
-                    keycode: Some(Keycode::Escape),
-                    ..
-                }
-                | Event::KeyDown {
-                    keycode: Some(Keycode::Q),
-                    ..
-                } => break 'running,
-                Event::KeyDown {
-                    keycode: Some(Keycode::D),
-                    ..
-                } => {
-                    let array = [0x20, 0x60, 0x20, 0x20, 0x70];
-                    let collision = display.draw((3, 2), &array);
-                    cpu.set_vf(collision as u8);
-                    graphics.draw_screen(display.screen);
-                }
-                Event::KeyDown {
-                    keycode: Some(Keycode::E),
-                    ..
-                } => {
-                    cpu.execute_opcode(0x00E0);
-                    cpu.execute_opcode(0x00EE);
-                }
-                _ => {}
+    'main: loop {
+        match input.read_input() {
+            Some(Keycode::Escape) | Some(Keycode::Q) => break 'main,
+            Some(Keycode::D) => {
+                let array = [0x20, 0x60, 0x20, 0x20, 0x70];
+                let collision = vm.bus.display.draw((3, 2), &array);
+                vm.cpu.set_vf(collision as u8);
+                graphics.draw_screen(vm.get_screen());
+                println!("{:?}", vm.cpu);
             }
+            Some(Keycode::E) => {
+                vm.cpu.execute_opcode(&mut vm.bus, 0x00E0);
+                vm.cpu.execute_opcode(&mut vm.bus, 0x00EE);
+            }
+            _ => {}
         }
 
+        // Chip8 runs at 60Hz
         std::thread::sleep(Duration::new(0, 1_000_000_000 / 60));
     }
 
