@@ -31,7 +31,7 @@ impl Cpu {
     pub fn run(&mut self, bus: &mut Bus) {
         let opcode = self.get_opcode_at_address(bus, self.pc);
         self.execute_opcode(bus, opcode);
-        // self.next_instruction();
+        self.next_instruction();
     }
 
     fn get_opcode_at_address(&self, bus: &Bus, address: u16) -> u16 {

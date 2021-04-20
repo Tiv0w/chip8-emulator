@@ -23,8 +23,4 @@ impl VM {
     pub fn get_screen(&self) -> [[bool; HEIGHT]; WIDTH] {
         self.bus.display.screen
     }
-
-    fn execute_opcode(&mut self, opcode: u16) {
-        self.cpu.execute_opcode(&mut self.bus, opcode);
-    }
 }
