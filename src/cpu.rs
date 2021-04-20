@@ -1,5 +1,7 @@
 use crate::bus::Bus;
 use crate::utils;
+use rand::rngs::ThreadRng;
+use rand::Rng;
 
 pub struct Cpu {
     delay: u8,
@@ -9,6 +11,7 @@ pub struct Cpu {
     sp: u16,
     stack: [u16; 16],
     v: [u8; 16],
+    rng: ThreadRng,
 }
 
 impl Cpu {
@@ -21,6 +24,7 @@ impl Cpu {
             sp: 0,
             stack: [0; 16],
             v: [0; 16],
+            rng: rand::thread_rng(),
         }
     }
 
@@ -171,7 +175,7 @@ impl Cpu {
             [0xC, x, ..] => {
                 println!("Set V{} to Rand AND {}", x, opcode & 0x00FF);
                 let constant = (opcode & 0x00FF) as u8;
-                let rand = 0x2; // FIXME: use real random
+                let rand: u8 = self.rng.gen();
                 self.v[x as usize] = rand & constant;
             }
             [0xD, x, y, n] => {
