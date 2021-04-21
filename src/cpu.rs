@@ -213,7 +213,8 @@ impl Cpu {
             }
             [0xF, x, 0x2, 0x9] => {
                 println!("Set I to sprite address for char in V{}", x);
-                // TODO: implement
+                let vx = self.v[x as usize];
+                self.i = (vx * 5) as u16;
             }
             [0xF, x, 0x3, 0x3] => {
                 println!("BCD V{}", x);
