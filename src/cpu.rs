@@ -182,9 +182,29 @@ impl Cpu {
                 println!("Draw {} {} {}", x, y, n);
                 self.draw(bus, x, y, n);
             }
-            [0xE, x, 0x9, n] => {
-                println!("Draw {} {}", x, n);
-                // self.draw(bus, x, y, n);
+            [0xE, x, 0x9, 0xE] => {
+                println!("KeyOp {}", x);
+                // TODO: implement
+            }
+            [0xE, x, 0xA, 0x1] => {
+                println!("KeyOp {}", x);
+                // TODO: implement
+            }
+            [0xF, x, 0x0, 0x7] => {
+                println!("Set V{} to value of delay timer", x);
+                self.v[x as usize] = self.delay;
+            }
+            [0xF, x, 0x0, 0xA] => {
+                println!("KeyOp {}", x);
+                // TODO: implement
+            }
+            [0xF, x, 0x1, 0x5] => {
+                println!("Set delay timer to V{}", x);
+                self.delay = self.v[x as usize];
+            }
+            [0xF, x, 0x1, 0x8] => {
+                println!("Set sound timer to V{}", x);
+                self.sound = self.v[x as usize];
             }
             [a, b, c, d] => {
                 println!(
