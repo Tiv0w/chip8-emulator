@@ -206,6 +206,27 @@ impl Cpu {
                 println!("Set sound timer to V{}", x);
                 self.sound = self.v[x as usize];
             }
+            [0xF, x, 0x1, 0xE] => {
+                println!("Add V{} to I", x);
+                let vx: u8 = self.v[x as usize];
+                self.i += vx as u16;
+            }
+            [0xF, x, 0x2, 0x9] => {
+                println!("Set I to sprite address for char in V{}", x);
+                // TODO: implement
+            }
+            [0xF, x, 0x3, 0x3] => {
+                println!("BCD V{}", x);
+                // TODO: implement
+            }
+            [0xF, x, 0x5, 0x5] => {
+                println!("Stores V0 to V{} in memory", x);
+                // TODO: implement
+            }
+            [0xF, x, 0x6, 0x5] => {
+                println!("Fills V0 to V{} from memory", x);
+                // TODO: implement
+            }
             [a, b, c, d] => {
                 println!(
                     "Not implemented for now or illegal: {} {} {} {}",
