@@ -27,8 +27,7 @@ fn main() -> Result<(), String> {
             // TEMP: input not translated, still for testing
             Some(Keycode::Escape) | Some(Keycode::Q) => break 'main,
             Some(Keycode::D) => {
-                vm.cpu.execute_opcode(&mut vm.bus, 0xD32E);
-                println!("{:?}", vm.cpu);
+                vm.cpu.execute_opcode(&mut vm.bus, 0xD323);
             }
             Some(Keycode::E) => {
                 vm.cpu.execute_opcode(&mut vm.bus, 0x00E0);

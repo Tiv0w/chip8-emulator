@@ -45,11 +45,11 @@ impl Cpu {
         let hex_digits: [u8; 4] = utils::get_hex_digits(opcode);
         match hex_digits {
             [0x0, 0x0, 0xE, 0x0] => {
-                println!("Clearscreen op");
+                println!("Clearscreen");
                 bus.display.clear();
             }
             [0x0, 0x0, 0xE, 0xE] => {
-                println!("Return from chip8 subroutine");
+                println!("Return from subroutine");
             }
             [0x0, a, b, c] => {
                 println!("Perfect {} {} {}", a, b, c);
@@ -179,7 +179,7 @@ impl Cpu {
                 self.v[x as usize] = rand & constant;
             }
             [0xD, x, y, n] => {
-                println!("Draw {} {} {}", x, y, n);
+                println!("Draw at (V{}, V{}) {} lines", x, y, n);
                 self.draw(bus, x, y, n);
             }
             [0xE, x, 0x9, 0xE] => {
@@ -285,6 +285,17 @@ impl std::fmt::Debug for Cpu {
             self.sp,
             self.stack,
             self.v
+        )
+    }
+}
+
+// part of debugging
+impl std::fmt::Display for Cpu {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "Cpu {{\n\ti: {},\n\tpc: {},\n\tv: {:?}\n}}",
+            self.i, self.pc, self.v
         )
     }
 }

@@ -16,7 +16,7 @@ impl VM {
     }
 
     pub fn run(&mut self) {
-        println!("{:?}", self.cpu);
+        println!("{}", self.cpu);
         self.cpu.run(&mut self.bus);
     }
 
