@@ -208,13 +208,16 @@ impl Cpu {
     }
 
     fn draw(&mut self, bus: &mut Bus, x: u8, y: u8, n: u8) {
+        let vx: usize = self.v[x as usize] as usize;
+        let vy: usize = self.v[y as usize] as usize;
+
         let mut sprite_vec: Vec<u8> = Vec::new();
         for j in 0..n + 1 {
             let address = self.i + j as u16;
             sprite_vec.push(bus.memory.read_byte(address as usize));
         }
 
-        let collision = bus.display.draw((x as usize, y as usize), &sprite_vec);
+        let collision = bus.display.draw((vx, vy), &sprite_vec);
         self.set_vf(collision as u8);
     }
 }
