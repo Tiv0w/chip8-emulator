@@ -77,7 +77,7 @@ impl Cpu {
                     self.skip_next_instruction();
                 }
             }
-            [0x5, x, y, 0] => {
+            [0x5, x, y, 0x0] => {
                 println!("Skip next instruction if V{} == V{}", x, y);
                 let vx = self.v[x as usize];
                 let vy = self.v[y as usize];
@@ -98,23 +98,23 @@ impl Cpu {
                 let add_result: u16 = (opcode & 0x00FF) + vx;
                 self.v[x as usize] = (add_result & 0x00FF) as u8;
             }
-            [0x8, x, y, 0] => {
+            [0x8, x, y, 0x0] => {
                 println!("Assign V{} to V{}", y, x);
                 self.v[x as usize] = self.v[y as usize];
             }
-            [0x8, x, y, 1] => {
+            [0x8, x, y, 0x1] => {
                 println!("Set V{} to (V{} OR V{})", x, x, y);
                 self.v[x as usize] = self.v[x as usize] | self.v[y as usize];
             }
-            [0x8, x, y, 2] => {
+            [0x8, x, y, 0x2] => {
                 println!("Set V{} to (V{} AND V{})", x, x, y);
                 self.v[x as usize] = self.v[x as usize] & self.v[y as usize];
             }
-            [0x8, x, y, 3] => {
+            [0x8, x, y, 0x3] => {
                 println!("Set V{} to (V{} XOR V{})", x, x, y);
                 self.v[x as usize] = self.v[x as usize] ^ self.v[y as usize];
             }
-            [0x8, x, y, 4] => {
+            [0x8, x, y, 0x4] => {
                 println!("Add V{} to V{}", y, x);
                 let vx: u16 = self.v[x as usize] as u16;
                 let vy: u16 = self.v[y as usize] as u16;
@@ -122,7 +122,7 @@ impl Cpu {
                 self.v[x as usize] = (add_result & 0x00FF) as u8;
                 self.v[0xF] = if (add_result >> 8) > 0 { 1 } else { 0 };
             }
-            [0x8, x, y, 5] => {
+            [0x8, x, y, 0x5] => {
                 println!("Subtract V{} to V{}", y, x);
                 let vx: i8 = self.v[x as usize] as i8;
                 let vy: i8 = self.v[y as usize] as i8;
@@ -130,13 +130,13 @@ impl Cpu {
                 self.v[x as usize] = sub_result as u8;
                 self.v[0xF] = if sub_result < 0 { 0 } else { 1 };
             }
-            [0x8, x, _, 6] => {
+            [0x8, x, _, 0x6] => {
                 println!("Shifts V{} by 1, stores last bit in VF", x);
                 let vx = self.v[x as usize];
                 self.v[0xF] = vx & 0x1;
                 self.v[x as usize] = vx >> 1;
             }
-            [0x8, x, y, 7] => {
+            [0x8, x, y, 0x7] => {
                 println!("Stores in V{} V{} - V{}", x, y, x);
                 let vx: i8 = self.v[x as usize] as i8;
                 let vy: i8 = self.v[y as usize] as i8;
@@ -153,7 +153,7 @@ impl Cpu {
             [0x8, ..] => {
                 println!("Illegal instruction");
             }
-            [0x9, x, y, 0] => {
+            [0x9, x, y, 0x0] => {
                 println!("Skip next instruction if V{} != V{}", x, y);
                 let vx = self.v[x as usize];
                 let vy = self.v[y as usize];
@@ -182,7 +182,7 @@ impl Cpu {
                 println!("Draw {} {} {}", x, y, n);
                 self.draw(bus, x, y, n);
             }
-            [0xE, x, 9, n] => {
+            [0xE, x, 0x9, n] => {
                 println!("Draw {} {}", x, n);
                 // self.draw(bus, x, y, n);
             }
