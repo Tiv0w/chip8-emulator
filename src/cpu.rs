@@ -221,11 +221,19 @@ impl Cpu {
             }
             [0xF, x, 0x5, 0x5] => {
                 println!("Stores V0 to V{} in memory", x);
-                // TODO: implement
+                let x = x as usize;
+                for idx in 0usize..=x {
+                    let v = self.v[idx];
+                    bus.memory.write_byte(self.i as usize + idx, v);
+                }
             }
             [0xF, x, 0x6, 0x5] => {
                 println!("Fills V0 to V{} from memory", x);
-                // TODO: implement
+                let x = x as usize;
+                for idx in 0usize..=x {
+                    let byte = bus.memory.read_byte(self.i as usize + idx);
+                    self.v[idx] = byte;
+                }
             }
             [a, b, c, d] => {
                 println!(
