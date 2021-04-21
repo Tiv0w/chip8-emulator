@@ -9,7 +9,7 @@ pub struct Cpu {
     pc: u16,
     sound: u8,
     sp: u16,
-    stack: [u16; 16],
+    stack: Vec<u16>,
     v: [u8; 16],
     rng: ThreadRng,
 }
@@ -22,7 +22,7 @@ impl Cpu {
             pc: 0x50,
             sound: 0,
             sp: 0,
-            stack: [0; 16],
+            stack: Vec::with_capacity(16),
             v: [0; 16],
             rng: rand::thread_rng(),
         }
