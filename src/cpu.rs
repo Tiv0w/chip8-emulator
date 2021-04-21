@@ -50,9 +50,10 @@ impl Cpu {
             }
             [0x0, 0x0, 0xE, 0xE] => {
                 println!("Return from subroutine");
-            }
-            [0x0, a, b, c] => {
-                println!("Perfect {} {} {}", a, b, c);
+                match self.stack.pop() {
+                    Some(pc) => self.pc = pc,
+                    None => println!("Error: trying to return from main program"),
+                }
             }
             [0x1, ..] => {
                 println!("Jump to {}", opcode & 0x0FFF);
@@ -60,8 +61,11 @@ impl Cpu {
             }
             [0x2, ..] => {
                 println!("Call subroutine at {}", opcode & 0x0FFF);
-                let subroutine_opcode = self.get_opcode_at_address(bus, opcode & 0x0FFF);
-                self.execute_opcode(bus, subroutine_opcode);
+                self.stack.push(self.pc);
+                self.pc = opcode & 0x0FFF - 2;
+                // let subroutine_opcode = self.get_opcode_at_address(bus, opcode & 0x0FFF);
+                // self.execute_opcode(bus, subroutine_opcode);
+                // self.run(bus);
             }
             [0x3, x, ..] => {
                 println!("Skip next instruction if equal to {}", opcode & 0x00FF);
