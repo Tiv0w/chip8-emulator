@@ -10,6 +10,7 @@ use crate::graphics::Graphics;
 use crate::input::SdlInput;
 use crate::vm::VM;
 use sdl2::keyboard::Keycode;
+use std::fs;
 use std::time::Duration;
 
 const WIDTH: usize = 64;
@@ -21,28 +22,23 @@ fn main() -> Result<(), String> {
     let mut graphics = Graphics::new(&sdl_context);
     let mut vm = VM::new();
     let mut sdl_input = SdlInput::new(&sdl_context);
+    let game = fs::read("./games/PONG.c8").expect("Couldn't read the file");
+
+    vm.bus.memory.load_game(game);
 
     'main: loop {
         match sdl_input.read_input() {
-            // TEMP: input not translated, still for testing
-            Some(Keycode::Escape) | Some(Keycode::Q) => break 'main,
+            Some(Keycode::Escape) | Some(Keycode::T) => break 'main,
             key => {
                 vm.bus.input.translate_input(key);
-            } // Some(Keycode::D) => {
-              //     vm.cpu.execute_opcode(&mut vm.bus, 0xD323);
-              // }
-              // Some(Keycode::E) => {
-              //     vm.cpu.execute_opcode(&mut vm.bus, 0x00E0);
-              //     vm.cpu.execute_opcode(&mut vm.bus, 0x00EE);
-              // }
-              // _ => {}
+            }
         }
 
         vm.run();
         graphics.draw_screen(vm.get_screen());
         // Chip8 runs at 60Hz
-        // TEMP: for testing, runs at 3Hz
-        std::thread::sleep(Duration::new(0, 1_000_000_000 / 3));
+        // FIXME: find another way to limit to 60Hz
+        std::thread::sleep(Duration::new(0, 1_000_000_000 / 60));
     }
 
     Ok(())

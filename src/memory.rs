@@ -8,25 +8,6 @@ impl Memory {
         for (index, byte) in FONT_SET.iter().enumerate() {
             default_mem[index] = *byte;
         }
-        // TEMP: for testing purposes
-        // Draw at (V3, V2) 5 lines
-        default_mem[0x50] = 0xD3;
-        default_mem[0x51] = 0x24;
-        // Assign V0 to 0
-        default_mem[0x52] = 0x60;
-        default_mem[0x53] = 0x00;
-        // Assign V1 to 16
-        default_mem[0x54] = 0x61;
-        default_mem[0x55] = 0x10;
-        // Assign V2 to 23
-        default_mem[0x56] = 0x62;
-        default_mem[0x57] = 0x17;
-        // Set I to sprite address of V4
-        default_mem[0x58] = 0xF4;
-        default_mem[0x59] = 0x29;
-        // Draw at (V1, V2) 5 lines
-        default_mem[0x5A] = 0xD1;
-        default_mem[0x5B] = 0x24;
         Memory { mem: default_mem }
     }
 
@@ -36,6 +17,12 @@ impl Memory {
 
     pub fn write_byte(&mut self, address: usize, value: u8) {
         self.mem[address] = value;
+    }
+
+    pub fn load_game(&mut self, game: Vec<u8>) {
+        for (index, byte) in game.iter().enumerate() {
+            self.mem[index + 0x200] = *byte;
+        }
     }
 }
 

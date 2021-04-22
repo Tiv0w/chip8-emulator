@@ -18,8 +18,8 @@ impl Cpu {
     pub fn new() -> Cpu {
         Cpu {
             delay: 0,
-            i: 0x0A,
-            pc: 0x50,
+            i: 0,
+            pc: 0x200,
             sound: 0,
             sp: 0,
             stack: Vec::with_capacity(16),
