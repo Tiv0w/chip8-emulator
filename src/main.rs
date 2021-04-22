@@ -7,7 +7,7 @@ mod memory;
 mod utils;
 mod vm;
 use crate::graphics::Graphics;
-use crate::input::Input;
+use crate::input::SdlInput;
 use crate::vm::VM;
 use sdl2::keyboard::Keycode;
 use std::time::Duration;
@@ -20,20 +20,22 @@ fn main() -> Result<(), String> {
 
     let mut graphics = Graphics::new(&sdl_context);
     let mut vm = VM::new();
-    let mut input = Input::new(&sdl_context);
+    let mut sdl_input = SdlInput::new(&sdl_context);
 
     'main: loop {
-        match input.read_input() {
+        match sdl_input.read_input() {
             // TEMP: input not translated, still for testing
             Some(Keycode::Escape) | Some(Keycode::Q) => break 'main,
-            Some(Keycode::D) => {
-                vm.cpu.execute_opcode(&mut vm.bus, 0xD323);
-            }
-            Some(Keycode::E) => {
-                vm.cpu.execute_opcode(&mut vm.bus, 0x00E0);
-                vm.cpu.execute_opcode(&mut vm.bus, 0x00EE);
-            }
-            _ => {}
+            key => {
+                vm.bus.input.translate_input(key);
+            } // Some(Keycode::D) => {
+              //     vm.cpu.execute_opcode(&mut vm.bus, 0xD323);
+              // }
+              // Some(Keycode::E) => {
+              //     vm.cpu.execute_opcode(&mut vm.bus, 0x00E0);
+              //     vm.cpu.execute_opcode(&mut vm.bus, 0x00EE);
+              // }
+              // _ => {}
         }
 
         vm.run();

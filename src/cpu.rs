@@ -193,12 +193,18 @@ impl Cpu {
                 self.draw(bus, x, y, n);
             }
             [0xE, x, 0x9, 0xE] => {
-                println!("KeyOp {}", x);
-                // TODO: implement
+                println!("KeyOp skip if V{} key pressed", x);
+                let vx: u8 = self.v[x as usize];
+                if bus.input.current_input == Some(vx) {
+                    self.skip_next_instruction();
+                }
             }
             [0xE, x, 0xA, 0x1] => {
-                println!("KeyOp {}", x);
-                // TODO: implement
+                println!("KeyOp skip if V{} key not pressed", x);
+                let vx: u8 = self.v[x as usize];
+                if bus.input.current_input != Some(vx) {
+                    self.skip_next_instruction();
+                }
             }
             [0xF, x, 0x0, 0x7] => {
                 println!("Set V{} to value of delay timer", x);
