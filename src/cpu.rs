@@ -222,7 +222,12 @@ impl Cpu {
             }
             [0xF, x, 0x3, 0x3] => {
                 println!("BCD V{}", x);
-                // TODO: implement
+                let vx: u8 = self.v[x as usize];
+                let bcd_digits = self.get_bcd(vx);
+                for j in 0usize..3usize {
+                    let address: usize = self.i as usize + j;
+                    bus.memory.write_byte(address, bcd_digits[j]);
+                }
             }
             [0xF, x, 0x5, 0x5] => {
                 println!("Stores V0 to V{} in memory", x);
@@ -273,6 +278,15 @@ impl Cpu {
 
         let collision = bus.display.draw((vx, vy), &sprite_vec);
         self.set_vf(collision as u8);
+    }
+
+    fn get_bcd(&mut self, x: u8) -> [u8; 3] {
+        let mut bcd_digits: [u8; 3] = [0; 3];
+        bcd_digits[2] = x % 10;
+        bcd_digits[1] = x / 10 % 10;
+        bcd_digits[0] = x / 100;
+
+        bcd_digits
     }
 }
 
