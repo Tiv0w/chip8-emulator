@@ -30,8 +30,8 @@ impl Cpu {
 
     pub fn run(&mut self, bus: &mut Bus) {
         let opcode = self.get_opcode_at_address(bus, self.pc);
+        println!("{:#X}", opcode);
         self.execute_opcode(bus, opcode);
-        self.next_instruction();
         if self.delay > 0 {
             self.delay -= 1;
         }
@@ -53,6 +53,7 @@ impl Cpu {
             [0x0, 0x0, 0xE, 0x0] => {
                 println!("Clearscreen");
                 bus.display.clear();
+                self.next_instruction();
             }
             [0x0, 0x0, 0xE, 0xE] => {
                 println!("Return from subroutine");
@@ -60,206 +61,235 @@ impl Cpu {
                     Some(pc) => self.pc = pc,
                     None => println!("Error: trying to return from main program"),
                 }
+                self.next_instruction();
             }
             [0x1, ..] => {
-                println!("Jump to {}", opcode & 0x0FFF);
+                println!("Jump to {:#X}", opcode & 0x0FFF);
                 self.pc = opcode & 0x0FFF;
             }
             [0x2, ..] => {
-                println!("Call subroutine at {}", opcode & 0x0FFF);
+                println!("Call subroutine at {:#X}", opcode & 0x0FFF);
                 self.stack.push(self.pc);
-                self.pc = opcode & 0x0FFF - 2;
-                // let subroutine_opcode = self.get_opcode_at_address(bus, opcode & 0x0FFF);
-                // self.execute_opcode(bus, subroutine_opcode);
-                // self.run(bus);
+                self.pc = opcode & 0x0FFF;
             }
             [0x3, x, ..] => {
-                println!("Skip next instruction if equal to {}", opcode & 0x00FF);
+                println!("Skip next instruction if equal to {:#X}", opcode & 0x00FF);
                 let vx = self.v[x as usize];
                 if vx == (opcode & 0x00FF) as u8 {
                     self.skip_next_instruction();
                 }
+                self.next_instruction();
             }
             [0x4, x, ..] => {
-                println!("Skip next instruction if not equal to {}", opcode & 0x00FF);
+                println!(
+                    "Skip next instruction if not equal to {:#X}",
+                    opcode & 0x00FF
+                );
                 let vx = self.v[x as usize];
                 if vx != (opcode & 0x00FF) as u8 {
                     self.skip_next_instruction();
                 }
+                self.next_instruction();
             }
             [0x5, x, y, 0x0] => {
-                println!("Skip next instruction if V{} == V{}", x, y);
+                println!("Skip next instruction if V{:#X} == V{:#X}", x, y);
                 let vx = self.v[x as usize];
                 let vy = self.v[y as usize];
                 if vx == vy {
                     self.skip_next_instruction();
                 }
+                self.next_instruction();
             }
             [0x5, ..] => {
                 println!("Illegal instruction");
             }
             [0x6, x, ..] => {
-                println!("Assign V{} = {}", x, opcode & 0x00FF);
+                println!("Assign V{:#X} = {:#X}", x, opcode & 0x00FF);
                 self.v[x as usize] = (opcode & 0x00FF) as u8;
+                self.next_instruction();
             }
             [0x7, x, ..] => {
-                println!("Add {} to V{}", opcode & 0x00FF, x);
+                println!("Add {:#X} to V{:#X}", opcode & 0x00FF, x);
                 let vx: u16 = self.v[x as usize] as u16;
                 let add_result: u16 = (opcode & 0x00FF) + vx;
                 self.v[x as usize] = (add_result & 0x00FF) as u8;
+                self.next_instruction();
             }
             [0x8, x, y, 0x0] => {
-                println!("Assign V{} to V{}", y, x);
+                println!("Assign V{:#X} to V{:#X}", y, x);
                 self.v[x as usize] = self.v[y as usize];
+                self.next_instruction();
             }
             [0x8, x, y, 0x1] => {
-                println!("Set V{} to (V{} OR V{})", x, x, y);
+                println!("Set V{:#X} to (V{:#X} OR V{:#X})", x, x, y);
                 self.v[x as usize] = self.v[x as usize] | self.v[y as usize];
+                self.next_instruction();
             }
             [0x8, x, y, 0x2] => {
-                println!("Set V{} to (V{} AND V{})", x, x, y);
+                println!("Set V{:#X} to (V{:#X} AND V{:#X})", x, x, y);
                 self.v[x as usize] = self.v[x as usize] & self.v[y as usize];
+                self.next_instruction();
             }
             [0x8, x, y, 0x3] => {
-                println!("Set V{} to (V{} XOR V{})", x, x, y);
+                println!("Set V{:#X} to (V{:#X} XOR V{:#X})", x, x, y);
                 self.v[x as usize] = self.v[x as usize] ^ self.v[y as usize];
+                self.next_instruction();
             }
             [0x8, x, y, 0x4] => {
-                println!("Add V{} to V{}", y, x);
+                println!("Add V{:#X} to V{:#X}", y, x);
                 let vx: u16 = self.v[x as usize] as u16;
                 let vy: u16 = self.v[y as usize] as u16;
                 let add_result: u16 = vx + vy;
                 self.v[x as usize] = (add_result & 0x00FF) as u8;
                 self.v[0xF] = if (add_result >> 8) > 0 { 1 } else { 0 };
+                self.next_instruction();
             }
             [0x8, x, y, 0x5] => {
-                println!("Subtract V{} to V{}", y, x);
+                println!("Subtract V{:#X} to V{:#X}", y, x);
                 let vx: i8 = self.v[x as usize] as i8;
                 let vy: i8 = self.v[y as usize] as i8;
                 let sub_result: i8 = vx - vy;
                 self.v[x as usize] = sub_result as u8;
                 self.v[0xF] = if sub_result < 0 { 0 } else { 1 };
+                self.next_instruction();
             }
             [0x8, x, _, 0x6] => {
-                println!("Shifts V{} by 1, stores last bit in VF", x);
+                println!("Shifts V{:#X} by 1, stores last bit in VF", x);
                 let vx = self.v[x as usize];
                 self.v[0xF] = vx & 0x1;
                 self.v[x as usize] = vx >> 1;
+                self.next_instruction();
             }
             [0x8, x, y, 0x7] => {
-                println!("Stores in V{} V{} - V{}", x, y, x);
+                println!("Stores in V{:#X} V{:#X} - V{:#X}", x, y, x);
                 let vx: i8 = self.v[x as usize] as i8;
                 let vy: i8 = self.v[y as usize] as i8;
                 let sub_result: i8 = vy - vx;
                 self.v[x as usize] = sub_result as u8;
                 self.v[0xF] = if sub_result < 0 { 0 } else { 1 };
+                self.next_instruction();
             }
             [0x8, x, _, 0xE] => {
-                println!("Shifts left V{} by 1, stores first bit in VF", x);
+                println!("Shifts left V{:#X} by 1, stores first bit in VF", x);
                 let vx = self.v[x as usize];
                 self.v[0xF] = vx & 0x80;
                 self.v[x as usize] = vx << 1;
+                self.next_instruction();
             }
             [0x8, ..] => {
                 println!("Illegal instruction");
             }
             [0x9, x, y, 0x0] => {
-                println!("Skip next instruction if V{} != V{}", x, y);
+                println!("Skip next instruction if V{:#X} != V{:#X}", x, y);
                 let vx = self.v[x as usize];
                 let vy = self.v[y as usize];
                 if vx != vy {
                     self.skip_next_instruction();
                 }
+                self.next_instruction();
             }
             [0x9, ..] => {
                 println!("Illegal instruction");
             }
             [0xA, ..] => {
-                println!("Set I to address {}", opcode & 0x0FFF);
+                println!("Set I to address {:#X}", opcode & 0x0FFF);
                 self.i = opcode & 0x0FFF;
+                self.next_instruction();
             }
             [0xB, ..] => {
-                println!("Jump to address {} + V0", opcode & 0x0FFF);
+                println!("Jump to address {:#X} + V0", opcode & 0x0FFF);
                 self.pc = opcode & 0x0FFF + self.v[0] as u16;
             }
             [0xC, x, ..] => {
-                println!("Set V{} to Rand AND {}", x, opcode & 0x00FF);
+                println!("Set V{:#X} to Rand AND {:#X}", x, opcode & 0x00FF);
                 let constant = (opcode & 0x00FF) as u8;
                 let rand: u8 = self.rng.gen();
                 self.v[x as usize] = rand & constant;
+                self.next_instruction();
             }
             [0xD, x, y, n] => {
-                println!("Draw at (V{}, V{}) {} lines", x, y, n);
+                println!("Draw at (V{:#X}, V{:#X}) {:#X} lines", x, y, n);
                 self.draw(bus, x, y, n);
+                self.next_instruction();
             }
             [0xE, x, 0x9, 0xE] => {
-                println!("KeyOp skip if V{} key pressed", x);
+                println!("KeyOp skip if V{:#X} key pressed", x);
                 let vx: u8 = self.v[x as usize];
                 if bus.input.current_input == Some(vx) {
                     self.skip_next_instruction();
                 }
+                self.next_instruction();
             }
             [0xE, x, 0xA, 0x1] => {
-                println!("KeyOp skip if V{} key not pressed", x);
+                println!("KeyOp skip if V{:#X} key not pressed", x);
                 let vx: u8 = self.v[x as usize];
                 if bus.input.current_input != Some(vx) {
                     self.skip_next_instruction();
                 }
+                self.next_instruction();
             }
             [0xF, x, 0x0, 0x7] => {
-                println!("Set V{} to value of delay timer", x);
+                println!("Set V{:#X} to value of delay timer", x);
                 self.v[x as usize] = self.delay;
+                self.next_instruction();
             }
             [0xF, x, 0x0, 0xA] => {
-                println!("KeyOp {}", x);
+                println!("KeyOp {:#X}", x);
                 // TODO: implement
             }
             [0xF, x, 0x1, 0x5] => {
-                println!("Set delay timer to V{}", x);
+                println!("Set delay timer to V{:#X}", x);
                 self.delay = self.v[x as usize];
+                self.next_instruction();
             }
             [0xF, x, 0x1, 0x8] => {
-                println!("Set sound timer to V{}", x);
+                println!("Set sound timer to V{:#X}", x);
                 self.sound = self.v[x as usize];
+                self.next_instruction();
             }
             [0xF, x, 0x1, 0xE] => {
-                println!("Add V{} to I", x);
+                println!("Add V{:#X} to I", x);
                 let vx: u8 = self.v[x as usize];
                 self.i += vx as u16;
+                self.next_instruction();
             }
             [0xF, x, 0x2, 0x9] => {
-                println!("Set I to sprite address for char in V{}", x);
+                println!("Set I to sprite address for char in V{:#X}", x);
                 let vx = self.v[x as usize];
                 self.i = (vx * 5) as u16;
+                self.next_instruction();
             }
             [0xF, x, 0x3, 0x3] => {
-                println!("BCD V{}", x);
+                println!("BCD V{:#X}", x);
                 let vx: u8 = self.v[x as usize];
                 let bcd_digits = self.get_bcd(vx);
                 for j in 0usize..3usize {
                     let address: usize = self.i as usize + j;
                     bus.memory.write_byte(address, bcd_digits[j]);
                 }
+                self.next_instruction();
             }
             [0xF, x, 0x5, 0x5] => {
-                println!("Stores V0 to V{} in memory", x);
+                println!("Stores V0 to V{:#X} in memory", x);
                 let x = x as usize;
                 for idx in 0usize..=x {
                     let v = self.v[idx];
                     bus.memory.write_byte(self.i as usize + idx, v);
                 }
+                self.next_instruction();
             }
             [0xF, x, 0x6, 0x5] => {
-                println!("Fills V0 to V{} from memory", x);
+                println!("Fills V0 to V{:#X} from memory", x);
                 let x = x as usize;
                 for idx in 0usize..=x {
                     let byte = bus.memory.read_byte(self.i as usize + idx);
                     self.v[idx] = byte;
                 }
+                self.next_instruction();
             }
             [a, b, c, d] => {
                 println!(
-                    "Not implemented for now or illegal: {} {} {} {}",
+                    "Not implemented for now or illegal: {:#X} {:#X} {:#X} {:#X}",
                     a, b, c, d
                 );
             }
@@ -324,7 +354,7 @@ impl std::fmt::Display for Cpu {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(
             f,
-            "Cpu {{\n\ti: {},\n\tpc: {},\n\tv: {:?}\n}}",
+            "Cpu {{\n\ti: {:#X},\n\tpc: {:#X},\n\tv: {:?}\n}}",
             self.i, self.pc, self.v
         )
     }
