@@ -32,6 +32,12 @@ impl Cpu {
         let opcode = self.get_opcode_at_address(bus, self.pc);
         self.execute_opcode(bus, opcode);
         self.next_instruction();
+        if self.delay > 0 {
+            self.delay -= 1;
+        }
+        if self.sound > 0 {
+            self.sound -= 1;
+        }
     }
 
     fn get_opcode_at_address(&self, bus: &Bus, address: u16) -> u16 {
