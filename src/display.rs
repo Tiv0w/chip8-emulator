@@ -46,7 +46,7 @@ impl Display {
 
             // We iterate on each bit of the byte
             for (col_idx, &state) in bool_row.iter().enumerate() {
-                let pixel_pos = ((x + col_idx), (y + row_idx));
+                let pixel_pos = ((x + col_idx) % WIDTH, (y + row_idx) % HEIGHT);
                 let current_pixel = self.get_pixel(pixel_pos);
 
                 collision_happened = collision_happened || (current_pixel && state);

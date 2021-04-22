@@ -283,7 +283,7 @@ impl Cpu {
         let vy: usize = self.v[y as usize] as usize;
 
         let mut sprite_vec: Vec<u8> = Vec::new();
-        for j in 0..=n {
+        for j in 0..n {
             let address = self.i + j as u16;
             sprite_vec.push(bus.memory.read_byte(address as usize));
         }
