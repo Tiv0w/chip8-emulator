@@ -76,7 +76,7 @@ impl Cpu {
                 println!("Skip next instruction if equal to {:#X}", opcode & 0x00FF);
                 let vx = self.v[x as usize];
                 if vx == (opcode & 0x00FF) as u8 {
-                    self.skip_next_instruction();
+                    self.next_instruction();
                 }
                 self.next_instruction();
             }
@@ -87,7 +87,7 @@ impl Cpu {
                 );
                 let vx = self.v[x as usize];
                 if vx != (opcode & 0x00FF) as u8 {
-                    self.skip_next_instruction();
+                    self.next_instruction();
                 }
                 self.next_instruction();
             }
@@ -96,7 +96,7 @@ impl Cpu {
                 let vx = self.v[x as usize];
                 let vy = self.v[y as usize];
                 if vx == vy {
-                    self.skip_next_instruction();
+                    self.next_instruction();
                 }
                 self.next_instruction();
             }
@@ -184,7 +184,7 @@ impl Cpu {
                 let vx = self.v[x as usize];
                 let vy = self.v[y as usize];
                 if vx != vy {
-                    self.skip_next_instruction();
+                    self.next_instruction();
                 }
                 self.next_instruction();
             }
@@ -216,7 +216,7 @@ impl Cpu {
                 println!("KeyOp skip if V{:#X} key pressed", x);
                 let vx: u8 = self.v[x as usize];
                 if bus.input.current_input == Some(vx) {
-                    self.skip_next_instruction();
+                    self.next_instruction();
                 }
                 self.next_instruction();
             }
@@ -224,7 +224,7 @@ impl Cpu {
                 println!("KeyOp skip if V{:#X} key not pressed", x);
                 let vx: u8 = self.v[x as usize];
                 if bus.input.current_input != Some(vx) {
-                    self.skip_next_instruction();
+                    self.next_instruction();
                 }
                 self.next_instruction();
             }
@@ -298,10 +298,6 @@ impl Cpu {
 
     fn set_vf(&mut self, value: u8) {
         self.v[0xF] = value;
-    }
-
-    fn skip_next_instruction(&mut self) {
-        self.pc += 2;
     }
 
     fn next_instruction(&mut self) {
