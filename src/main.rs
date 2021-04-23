@@ -12,6 +12,7 @@ use crate::vm::VM;
 use sdl2::keyboard::Keycode;
 use std::fs;
 use std::time::Duration;
+use std::time::Instant;
 
 const WIDTH: usize = 64;
 const HEIGHT: usize = 32;
@@ -26,6 +27,9 @@ fn main() -> Result<(), String> {
 
     vm.bus.memory.load_game(game);
 
+    let chip8_duration = Duration::new(0, 1_000_000_000 / 60);
+    let mut last_process_time: Instant = Instant::now();
+
     'main: loop {
         match sdl_input.read_input() {
             Some(Keycode::Escape) | Some(Keycode::T) => break 'main,
@@ -34,11 +38,11 @@ fn main() -> Result<(), String> {
             }
         }
 
-        vm.run();
-        graphics.draw_screen(vm.get_screen());
-        // Chip8 runs at 60Hz
-        // FIXME: find another way to limit to 60Hz
-        std::thread::sleep(Duration::new(0, 1_000_000_000 / 60));
+        if Instant::now().duration_since(last_process_time) > chip8_duration {
+            vm.run();
+            graphics.draw_screen(vm.get_screen());
+            last_process_time = Instant::now();
+        }
     }
 
     Ok(())
