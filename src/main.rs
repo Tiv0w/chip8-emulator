@@ -1,14 +1,9 @@
-mod bus;
-mod cpu;
-mod display;
+mod chip8;
 mod graphics;
 mod input;
-mod memory;
-mod utils;
-mod vm;
+use crate::chip8::vm::VM;
 use crate::graphics::Graphics;
 use crate::input::SdlInput;
-use crate::vm::VM;
 use sdl2::keyboard::Keycode;
 use std::fs;
 use std::time::Duration;
@@ -41,7 +36,8 @@ fn main() -> Result<(), String> {
         }
 
         if Instant::now().duration_since(last_key_time) > key_update_duration {
-            vm.bus.input.translate_input(last_key_pressed);
+            let current_input = sdl_input.translate_input(last_key_pressed);
+            vm.bus.input.set_current_key(current_input);
             last_key_pressed = None;
             last_key_time = Instant::now();
         }

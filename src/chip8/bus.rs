@@ -1,6 +1,6 @@
-use crate::display::Display;
-use crate::input::Input;
-use crate::memory::Memory;
+use super::display::Display;
+use super::input::Input;
+use super::memory::Memory;
 
 pub struct Bus {
     pub display: Display,

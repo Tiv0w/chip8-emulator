@@ -1,5 +1,5 @@
-use crate::bus::Bus;
-use crate::cpu::Cpu;
+use super::bus::Bus;
+use super::cpu::Cpu;
 use crate::{HEIGHT, WIDTH};
 
 pub struct VM {
@@ -16,7 +16,7 @@ impl VM {
     }
 
     pub fn run(&mut self) {
-        println!("{}", self.cpu);
+        // println!("{}", self.cpu);
         self.cpu.run(&mut self.bus);
     }
 

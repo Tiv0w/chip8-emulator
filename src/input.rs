@@ -21,21 +21,9 @@ impl SdlInput {
             _ => None,
         }
     }
-}
 
-pub struct Input {
-    pub current_input: Option<u8>,
-}
-
-impl Input {
-    pub fn new() -> Input {
-        Input {
-            current_input: None,
-        }
-    }
-
-    pub fn translate_input(&mut self, key: Option<Keycode>) {
-        let translation: Option<u8> = match key {
+    pub fn translate_input(&self, key: Option<Keycode>) -> Option<u8> {
+        match key {
             Some(keycode) => match keycode {
                 Keycode::Num1 | Keycode::Num7 => Some(0x1),
                 Keycode::Num2 | Keycode::Num8 => Some(0x2),
@@ -59,7 +47,6 @@ impl Input {
                 _ => None,
             },
             None => None,
-        };
-        self.current_input = translation;
+        }
     }
 }

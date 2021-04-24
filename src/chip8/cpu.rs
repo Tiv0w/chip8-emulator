@@ -1,5 +1,5 @@
-use crate::bus::Bus;
-use crate::utils;
+use super::bus::Bus;
+use super::utils;
 use rand::rngs::ThreadRng;
 use rand::Rng;
 
@@ -215,7 +215,7 @@ impl Cpu {
             [0xE, x, 0x9, 0xE] => {
                 println!("KeyOp skip if V{:#X} key pressed", x);
                 let vx: u8 = self.v[x as usize];
-                if bus.input.current_input == Some(vx) {
+                if bus.input.get_current_key() == Some(vx) {
                     self.next_instruction();
                 }
                 self.next_instruction();
@@ -223,7 +223,7 @@ impl Cpu {
             [0xE, x, 0xA, 0x1] => {
                 println!("KeyOp skip if V{:#X} key not pressed", x);
                 let vx: u8 = self.v[x as usize];
-                if bus.input.current_input != Some(vx) {
+                if bus.input.get_current_key() != Some(vx) {
                     self.next_instruction();
                 }
                 self.next_instruction();
@@ -235,7 +235,7 @@ impl Cpu {
             }
             [0xF, x, 0x0, 0xA] => {
                 println!("KeyOp store key in V{:#X}", x);
-                match bus.input.current_input {
+                match bus.input.get_current_key() {
                     Some(input) => {
                         self.v[x as usize] = input;
                         self.next_instruction();
