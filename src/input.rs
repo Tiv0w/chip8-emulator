@@ -37,10 +37,10 @@ impl Input {
     pub fn translate_input(&mut self, key: Option<Keycode>) {
         let translation: Option<u8> = match key {
             Some(keycode) => match keycode {
-                Keycode::Exclaim | Keycode::Ampersand => Some(0x1),
-                Keycode::At | Keycode::Asterisk => Some(0x2),
-                Keycode::Hash | Keycode::LeftParen => Some(0x3),
-                Keycode::Dollar | Keycode::RightParen => Some(0xC),
+                Keycode::Num1 | Keycode::Num7 => Some(0x1),
+                Keycode::Num2 | Keycode::Num8 => Some(0x2),
+                Keycode::Num3 | Keycode::Num9 => Some(0x3),
+                Keycode::Num4 | Keycode::Num0 => Some(0xC),
 
                 Keycode::Q | Keycode::U => Some(0x4),
                 Keycode::W | Keycode::I => Some(0x5),
