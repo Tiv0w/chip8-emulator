@@ -27,18 +27,26 @@ fn main() -> Result<(), String> {
 
     vm.bus.memory.load_game(game);
 
-    let chip8_duration = Duration::new(0, 1_000_000_000 / 60);
+    let process_duration = Duration::from_millis(1000 / 60);
+    let key_update_duration = Duration::from_millis(200);
     let mut last_process_time: Instant = Instant::now();
+    let mut last_key_time: Instant = Instant::now();
+    let mut last_key_pressed: Option<Keycode> = None;
 
     'main: loop {
         match sdl_input.read_input() {
-            Some(Keycode::Escape) | Some(Keycode::T) => break 'main,
-            key => {
-                vm.bus.input.translate_input(key);
-            }
+            Some(Keycode::Escape) => break 'main,
+            Some(key) => last_key_pressed = Some(key),
+            None => {}
         }
 
-        if Instant::now().duration_since(last_process_time) > chip8_duration {
+        if Instant::now().duration_since(last_key_time) > key_update_duration {
+            vm.bus.input.translate_input(last_key_pressed);
+            last_key_pressed = None;
+            last_key_time = Instant::now();
+        }
+
+        if Instant::now().duration_since(last_process_time) > process_duration {
             vm.run();
             graphics.draw_screen(vm.get_screen());
             last_process_time = Instant::now();

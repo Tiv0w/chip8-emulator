@@ -34,7 +34,7 @@ impl Input {
         }
     }
 
-    pub fn translate_input(&mut self, key: Option<Keycode>) -> Option<u8> {
+    pub fn translate_input(&mut self, key: Option<Keycode>) {
         let translation: Option<u8> = match key {
             Some(keycode) => match keycode {
                 Keycode::Exclaim | Keycode::Ampersand => Some(0x1),
@@ -60,8 +60,6 @@ impl Input {
             },
             None => None,
         };
-
         self.current_input = translation;
-        translation
     }
 }
