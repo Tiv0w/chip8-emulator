@@ -234,8 +234,14 @@ impl Cpu {
                 self.next_instruction();
             }
             [0xF, x, 0x0, 0xA] => {
-                println!("KeyOp {:#X}", x);
-                // TODO: implement
+                println!("KeyOp store key in V{:#X}", x);
+                match bus.input.current_input {
+                    Some(input) => {
+                        self.v[x as usize] = input;
+                        self.next_instruction();
+                    }
+                    None => {}
+                }
             }
             [0xF, x, 0x1, 0x5] => {
                 println!("Set delay timer to V{:#X}", x);
