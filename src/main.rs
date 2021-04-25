@@ -1,15 +1,11 @@
-mod chip8;
 mod desktop;
-use crate::chip8::vm::VM;
-use crate::desktop::graphics::Graphics;
-use crate::desktop::input::SdlInput;
+use chip8_emulator::vm::VM;
+use desktop::graphics::Graphics;
+use desktop::input::SdlInput;
 use sdl2::keyboard::Keycode;
 use std::fs;
 use std::time::Duration;
 use std::time::Instant;
-
-const WIDTH: usize = 64;
-const HEIGHT: usize = 32;
 
 fn main() -> Result<(), String> {
     let sdl_context = sdl2::init().unwrap();

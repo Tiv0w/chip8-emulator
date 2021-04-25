@@ -1,4 +1,4 @@
-use crate::{HEIGHT, WIDTH};
+use chip8_emulator::{HEIGHT, WIDTH};
 use sdl2::pixels::Color;
 use sdl2::rect::Point;
 use sdl2::render::Canvas;
