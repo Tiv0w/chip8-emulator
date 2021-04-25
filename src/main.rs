@@ -1,9 +1,8 @@
 mod chip8;
-mod graphics;
-mod input;
+mod desktop;
 use crate::chip8::vm::VM;
-use crate::graphics::Graphics;
-use crate::input::SdlInput;
+use crate::desktop::graphics::Graphics;
+use crate::desktop::input::SdlInput;
 use sdl2::keyboard::Keycode;
 use std::fs;
 use std::time::Duration;
