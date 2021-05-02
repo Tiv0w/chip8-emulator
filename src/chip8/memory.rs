@@ -1,7 +1,11 @@
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
 pub struct Memory {
     mem: [u8; 4096],
 }
 
+#[wasm_bindgen]
 impl Memory {
     pub fn new() -> Memory {
         let mut default_mem = [0; 4096];

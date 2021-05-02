@@ -1,7 +1,11 @@
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
 pub struct Input {
     current_key: Option<u8>,
 }
 
+#[wasm_bindgen]
 impl Input {
     pub fn new() -> Input {
         Input { current_key: None }

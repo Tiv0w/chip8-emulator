@@ -1,11 +1,12 @@
 use crate::{HEIGHT, WIDTH};
+use wasm_bindgen::prelude::*;
 
-type Coordinates = (usize, usize);
-
+#[wasm_bindgen]
 pub struct Display {
-    pub screen: [[bool; HEIGHT]; WIDTH],
+    screen: [[bool; HEIGHT]; WIDTH],
 }
 
+#[wasm_bindgen]
 impl Display {
     pub fn new() -> Display {
         Display {
@@ -13,15 +14,27 @@ impl Display {
         }
     }
 
+    pub fn get_screen_for_js(&self) -> Box<[JsValue]> {
+        let mut screen_js: [JsValue; HEIGHT * WIDTH];
+        for (col_idx, col) in self.screen.iter().enumerate() {
+            for (val_idx, value) in col.iter().enumerate() {
+                let idx = HEIGHT * col_idx + val_idx;
+                screen_js[idx] = JsValue::from(*value);
+            }
+        }
+        let boxed_screen: Box<[JsValue]> = Box::new(screen_js);
+        boxed_screen
+    }
+
     pub fn clear(&mut self) {
         self.screen = [[false; HEIGHT]; WIDTH];
     }
 
-    pub fn set_pixel(&mut self, (x, y): Coordinates, new_state: bool) {
+    pub fn set_pixel(&mut self, x: usize, y: usize, new_state: bool) {
         self.screen[x][y] ^= new_state;
     }
 
-    pub fn get_pixel(&self, (x, y): Coordinates) -> bool {
+    pub fn get_pixel(&self, x: usize, y: usize) -> bool {
         self.screen[x][y]
     }
 
@@ -36,7 +49,7 @@ impl Display {
         bool_array
     }
 
-    pub fn draw(&mut self, (x, y): Coordinates, sprite: &[u8]) -> bool {
+    pub fn draw(&mut self, x: usize, y: usize, sprite: &[u8]) -> bool {
         let mut collision_happened = false;
 
         // We iterate on each row of the sprite
@@ -46,12 +59,13 @@ impl Display {
 
             // We iterate on each bit of the byte
             for (col_idx, &state) in bool_row.iter().enumerate() {
-                let pixel_pos = ((x + col_idx) % WIDTH, (y + row_idx) % HEIGHT);
-                let current_pixel = self.get_pixel(pixel_pos);
+                let pixel_pos_x = (x + col_idx) % WIDTH;
+                let pixel_pos_y = (y + row_idx) % HEIGHT;
+                let current_pixel = self.get_pixel(pixel_pos_x, pixel_pos_y);
 
                 collision_happened = collision_happened || (current_pixel && state);
 
-                self.set_pixel(pixel_pos, state);
+                self.set_pixel(pixel_pos_x, pixel_pos_y, state);
             }
         }
 

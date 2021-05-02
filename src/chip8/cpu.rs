@@ -2,7 +2,9 @@ use super::bus::Bus;
 use super::utils;
 use rand::rngs::ThreadRng;
 use rand::Rng;
+use wasm_bindgen::prelude::*;
 
+#[wasm_bindgen]
 pub struct Cpu {
     delay: u8,
     i: u16,
@@ -14,6 +16,7 @@ pub struct Cpu {
     rng: ThreadRng,
 }
 
+#[wasm_bindgen]
 impl Cpu {
     pub fn new() -> Cpu {
         Cpu {
@@ -320,7 +323,7 @@ impl Cpu {
             sprite_vec.push(bus.memory.read_byte(address as usize));
         }
 
-        let collision = bus.display.draw((vx, vy), &sprite_vec);
+        let collision = bus.display.draw(vx, vy, &sprite_vec);
         self.set_vf(collision as u8);
     }
 

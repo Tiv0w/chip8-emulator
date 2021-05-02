@@ -1,10 +1,11 @@
 use super::bus::Bus;
 use super::cpu::Cpu;
-use crate::{HEIGHT, WIDTH};
+use wasm_bindgen::prelude::*;
 
+#[wasm_bindgen]
 pub struct VM {
-    pub cpu: Cpu,
-    pub bus: Bus,
+    cpu: Cpu,
+    bus: Bus,
 }
 
 impl VM {
@@ -20,7 +21,15 @@ impl VM {
         self.cpu.run(&mut self.bus);
     }
 
-    pub fn get_screen(&self) -> [[bool; HEIGHT]; WIDTH] {
-        self.bus.display.screen
+    pub fn get_screen_for_js(&self) -> Box<[JsValue]> {
+        self.bus.display.get_screen_for_js()
+    }
+
+    pub fn cpu(&mut self) -> &Cpu {
+        &self.cpu
+    }
+
+    pub fn bus(&mut self) -> &Bus {
+        &self.bus
     }
 }

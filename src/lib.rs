@@ -1,3 +1,4 @@
+use wasm_bindgen::prelude::*;
 pub mod chip8;
 pub use chip8::*;
 

@@ -1,12 +1,10 @@
-mod desktop;
 use chip8_emulator::vm::VM;
-use desktop::graphics::Graphics;
-use desktop::input::SdlInput;
-use sdl2::keyboard::Keycode;
 use std::fs;
 use std::time::Duration;
 use std::time::Instant;
+use wasm_bindgen::prelude::*;
 
+#[wasm_bindgen(skip)]
 fn main() -> Result<(), String> {
     let sdl_context = sdl2::init().unwrap();
 
